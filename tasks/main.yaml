@@ -1,0 +1,61 @@
+---
+- name: Ensure dependencies are installed
+  ansible.builtin.apt:
+    name:
+      - gnupg-agent
+      - gpg
+      - libccid
+      - pcsc-tools
+      - pcscd
+      - scdaemon
+    state: present
+  become: true
+
+- name: Ensure pcscd is running
+  ansible.builtin.service:
+    enabled: true
+    name: pcscd
+    state: started
+  become: true
+
+- name: Fetch GPG key
+  ansible.builtin.get_url:
+    dest: /tmp/gpg-key
+    mode: u=rw,go=
+    url: "{{ gpg_key_url }}"
+    
+- name: Import GPG key
+  ansible.builtin.shell: >
+    gpg --import /tmp/gpg-key
+
+- name: Trust GPG key
+  ansible.builtin.shell: >
+    echo -e "\n5\ny\n"
+    | gpg --command-fd 0 --expert --edit-key "{{ gpg_key_fingerprint }}" trust
+
+- name: Ensure ~/.gnupg/ directory exists
+  ansible.builtin.file:
+    mode: u=rwx,go=
+    path: ~/.gnupg
+    state: directory
+
+- name: Tell gpg-agent to use standard socket and to enable-ssh-support
+  ansible.builtin.lineinfile:
+    create: true
+    line: "{{ item }}"
+    path: ~/.gnupg/gpg-agent.conf
+    regexp: "{{ item }}"
+    state: present
+  loop:
+    - use-standard-socket
+    - enable-ssh-support
+
+- name: Ensure that XFCE doesn't start ssh-agent for you
+  ansible.builtin.command: >
+    xfconf-query -c xfce4-session
+    -p /startup/ssh-agent/enabled
+    -n -t bool
+    -s false
+
+- name: Tell GPG that the private keys are present on the Yubikey
+  ansible.builtin.command: gpg --card-status
