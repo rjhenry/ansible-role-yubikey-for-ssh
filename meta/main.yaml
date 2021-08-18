@@ -1,0 +1,25 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: yubikey-for-ssh
+  author: rjhenry
+  description: Install and configure tools for Yubikey SSH
+  min_ansible_version: 2.2
+  platforms:
+    - name: GenericUNIX
+      versions:
+        - all
+        - any
+    - name: GenericBSD
+      versions:
+        - all
+        - any
+    - name: GenericLinux
+      versions:
+        - all
+        - any
+  galaxy_tags:
+    - development
+    - system
+    - configuration
