@@ -2,7 +2,7 @@
 dependencies: []
 
 galaxy_info:
-  role_name: yubikey-for-ssh
+  role_name: yubikey_for_ssh
   author: rjhenry
   description: Install and configure tools for Yubikey SSH
   min_ansible_version: 2.2
